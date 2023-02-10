@@ -1,4 +1,4 @@
-fconst fs = require("fs");
+const fs = require("fs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const moment = require("moment");
@@ -72,12 +72,17 @@ exports.verifyOtp = async (req,res,next)=>{
 
       const errors={};
       //const otpExpired = await db.query(`SELECT otpEmailSentAt=NULL WHERE id=${user.id}`)
-      const {otpCode,email,name,identity,interest,age,favDrink,favSong,hobbies,petPeeve,relationPreference,fcmToken}= req.body;  
+      const {otpCode,email,name,identity,interest,age,favDrink,favSong,hobbies,petPeeve,relationPreference,fcmToken,already_OTPverified}= req.body;  
       
       if(!age){errors.age=`age is required.`;}
       if(!name){errors.name=`name is required.`;}
       if(!email){errors.email=`email is required.`;}
-      if(!otpCode){errors.otpCode=`otpCode is required.`;}
+
+        if (already_OTPverified == 'true') {
+          
+        }else{
+          if(!otpCode){errors.otpCode=`otpCode is required.`;}
+        }
       if(!identity){errors.identity=`identity is required.`;}
       if(!interest){errors.interest=`interest is required.`;}
       if(!favDrink){errors.favDrink=`favDrink is required.`;}
@@ -87,19 +92,30 @@ exports.verifyOtp = async (req,res,next)=>{
       if(!relationPreference){errors.relationPreference=`relationPreference is required.`;}
       if(!fcmToken){errors.fcmToken=`fcmToken is required.`;}
       
+
+      
       if(Object.keys(errors).length>0){ return res.json({status:'fails',errors}); }
-      let user  = await User.findOne({where:{otpEmailCode:otpCode,email}});
+
+      let user;
+      if (already_OTPverified == 'true') {
+        user  = await User.findOne({where:{todayOtpVerified:1,email}});  
+      }else{
+        user  = await User.findOne({where:{otpEmailCode:otpCode,email}});
       console.log(new Date().toLocaleString(),`=> findOne user otpEmailCode=${otpCode} ,email=${email} result=`,user);
+      }
+      
+      // return res.json(user);
+
 
       if(!user || !user.id){ 
-        console.log(new Date().toLocaleString(),`=> user not exist otpEmailCode=${otpCode} ,email=${email}`);
+        // console.log(new Date().toLocaleString(),`=> user not exist otpEmailCode=${otpCode} ,email=${email}`);
         console.log(new Date().toLocaleString(),{status:`failed`,message:`Invalid OTP`});
         return res.json({status:`failed`,message:`Invalid OTP`}); 
       }
       else
       {
         const token = jwt.sign({ id: user.id },"pd_JWTSecret_123");
-        console.log(`OTP=${otpCode} & email=${email} successfully verified.`);
+        // console.log(`OTP=${otpCode} & email=${email} successfully verified.`);
         const updated = await db.query(`UPDATE users SET todayOtpVerified='1', age='${age}', name='${name}', identity='${identity}', interest='${interest}', favSong='${favSong}', favDrink='${favDrink}', hobbies='${hobbies}' ,petPeeve='${petPeeve}' ,relationPreference='${relationPreference}' ,showbar='1' ,fcmToken='${fcmToken}' ,jwt_token='${token}' ,otpEmailCode=NULL,otpEmailSentAt=NULL WHERE id=${user.id}`)
         user = await User.findByPk(user.id);
         console.log(`Verified email=${email} row updated user`,updated);
@@ -450,6 +466,7 @@ exports.updateUser = async (req, res, next) => {
     favSong,
     hobbies,
     petPeeve,
+    relationPreference,
   } = req.body;
 
   try {
@@ -469,6 +486,7 @@ exports.updateUser = async (req, res, next) => {
       favSong,
       hobbies,
       petPeeve,
+      relationPreference,
     });
     res.json({ msg: "User Updated", singleUser });
   } catch (error) {
