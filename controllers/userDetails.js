@@ -452,6 +452,54 @@ exports.getUser = async (req, res, next) => {
 
 };
 
+exports.getUserByFCM = async (req, res, next) => {
+  
+  const userEmailId = req.params.email;
+  try {
+    
+
+   let userDetails =  await db.query(`SELECT * FROM users where email='${userEmailId}'`,{ type: QueryTypes.SELECT })
+  
+
+    if (userDetails == "") {
+      return res.status(404).json({ msg: "No User Found" });
+    }else{
+
+      return  res.json({ msg: "user Fetched ",UserDetails:JSON.stringify(userDetails)});
+    }
+
+    
+    return  res.json({ msg: "user Fetched "+userEmailId});  
+    
+    
+
+    //let user2 = await db.query(`SELECT * FROM users where id='${userId}'`,{ type: QueryTypes.SELECT })
+
+    if (!user) {
+      return res.status(404).json({ msg: "No User Found" });
+    }
+
+    const todayDate = moment().format('YYYY-MM-DD')
+
+    const paidForUserData = await userPaidFor.findAll({
+      attributes:['paidForUser'],
+      where:{userId:userId,paidAt:todayDate}
+    });
+  
+    const paidUserIds = paidForUserData.map(row=>row.paidForUser)
+    console.log({ msg: "user Fetched",paidUserIds,user, customerId: user.stripeCustomerId });
+    return res.json({ msg: "user Fetched",paidUserIds,user, customerId: user.stripeCustomerId });
+  
+  } catch (error) {
+    error.statusCode = 403;
+    // throw error.message;
+    return res.status(500).json({ error: "Something went wrong on our side" });
+  }
+
+};
+
+
+
 
 
 
@@ -576,70 +624,6 @@ exports.uploadSelfie = async (req, res) => {
 
   }catch(err){ return res.status(500).json({error:err.message}); }
 
-
-  // console.log(new Date().toLocaleString(),`uploadSelfie func called...`);
-
-  // const file = req.file;
-  // console.log(new Date().toLocaleString(),`req.file====>`,file);
-
-  // // const userId = req.params.userId;
-  // try {
-  //   if (!file) {
-  //     console.log(new Date().toLocaleString(),`!file condition=1 ====>`,file);
-
-  //     console.log(new Date().toLocaleString(),`res.status(400).json ====>`,{
-  //       msg: "Please Provide your image",
-  //     });
-      
-  //     return res.status(400).json({
-  //       msg: "Please Provide your image",
-  //     });
-  //   }
-
-  //   if (
-  //     file.mimetype !== "image/png" &&
-  //     file.mimetype !== "image/jpg" &&
-  //     file.mimetype !== "image/jpeg"
-  //   ) {
-
-  //     console.log(new Date().toLocaleString(),`res statsu=422 json=`,{ error: "Image must be in jpeg OR png format" });
-  //     return res
-  //       .status(422)
-  //       .json({ error: "Image must be in jpeg OR png format" });
-  //   }
-
-  //   const result = await uploadSelfie(file);
-
-  //   const user = await User.findByPk(req.userId);
-  //   if (!user) {
-  //     console.log(new Date().toLocaleString(),`User.findByPk(req.userId)=`,{ error: "No User found" });
-  //     res.status(400).json({ error: "No User found" });
-  //   }
-
-  //   const image = await user.createPicture({
-  //     imageUrl: result.Location,
-  //   });
-
-  //   console.log(new Date().toLocaleString(),`user.createPicture = `,image);
-
-  //   const job = schedule.scheduleJob("0 5 * * *", async function () {
-  //     const currPic = image.id;
-  //     const deletedPic = await Picture.destroy({
-  //       where: { id: currPic, userId: user.id },
-  //     });
-  //     console.log(`${deletedPic} Pic Deleted: with id: -> ${currPic}`);
-  //     schedule.gracefulShutdown();
-  //   });
-  //   console.log("ressssssssssssss ------------->", req.userId);
-
-  //   res.status(200).json({ msg: "Image uploaded", result, image });
-  //   console.log(new Date().toLocaleString(),`res.status(200).json=`,{ msg: "Image uploaded", result, image });
-  // } catch (error) {
-  //   error.statusCode = 403;
-  //   // throw error.message;
-  //   console.log(new Date().toLocaleString(),`res.status(500).json=`,{error:"Something went wrong on our side" });
-  //   return res.status(500).json({ error: "Something went wrong on our side" });
-  // }
 };
 
 
@@ -697,34 +681,6 @@ exports.addUserToLocation = async (req, res, next) => {
 };
 
 
-// exports.addUserToLocation = async (req, res, next) => {
-//   try {
-//     if (!req.body.locationId) {
-//       return res.json({ error: "Location Cannot be Empty" });
-//     }
-//     const user = await User.findByPk(req.userId);
-
-//     if (!user) {
-//       return res.status(404).json({ msg: "No User with that id exists" });
-//     }
-
-//     const location = await Location.findOne({
-//       where: { id: req.body.locationId },
-//     });
-//     const getLocation = await location.addUser(user);
-
-//     res.json({
-//       msg: `Added user to Location ${location.location}`,
-//       location: location.location,
-//     });
-//   } catch (error) {
-//     error.statusCode = 403;
-//     // throw error.message;
-//     return res.status(500).json({ error: "Something went wrong on our side" });
-//   }
-// };
-
-
 
 //Mohsin Code
 exports.updateUserLocation = async (req, res, next) => {
@@ -755,36 +711,7 @@ exports.updateUserLocation = async (req, res, next) => {
 
 };
 
-//Previous Dev Code
-// exports.updateUserLocation = async (req, res, next) => {
-//   // const userId = req.params.userId;
-//   const locationId = req.params.locationId;
-//   try {
-//     if (!req.userId) {
-//       return res.status(404).json({ msg: "No User with that id exists" });
-//     }
 
-//     const user = await User.findByPk(req.userId);
-//     if (!user) {
-//       res.status(400).json({ error: "No User found" });
-//     }
-
-//     const location = await Location.findOne({
-//       where: { id: locationId },
-//     });
-
-//     if (!location) {
-//       return res.status(404).json({ error: "No Such Location" });
-//     }
-
-//     const newLocation = await user.setLocations(location);
-//     res.json({ msg: "Location updated", newLocation });
-//   } catch (error) {
-//     error.statusCode = 403;
-//     // throw error.message;
-//     return res.status(500).json({ error: "Something went wrong on our side" });
-//   }
-// };
 
 
 //Mohsin Code..
@@ -816,41 +743,3 @@ exports.getLocationUser = async (req, res, next) => {
   }catch (err) {return res.status(500).json({status:`error`,message:err.message});}
   
 };
-
-
-//Misbah Code.
-// exports.getLocationUser = async (req, res, next) => {
-//   //return res.json('getLocationUser');
-//   const locationId = req.params.locationId;
-//   const qrId = req.params.qrId;
-
-//   try {
-//     if (!locationId) {
-//       const error = new Error("No Such location");
-//       error.statusCode = 403;
-//       // throw error.message;
-//       return res.status(404).json({ error: error.message });
-//     }
-//     const users = await Location.findByPk(locationId, {
-//       include: [
-//         {
-//           model: User,
-//           all: true,
-//           nested: true,
-//         },
-
-//         // { where: { qrCodeId: qrId } },
-//       ],
-//     });
-//     if (users.dataValues.users.length === 0) {
-//       return res.status(404).json({ msg: "No Users in this location" });
-//     }
-//     console.log(users.dataValues.users[0]);
-//     res.json({ msg: `users for id: ${locationId} fetched`,countUsers:users.users.length,users });
-//   } catch (error) {
-//     error.statusCode = 403;
-//     // throw error.message;
-//     console.log(error);
-//     return res.status(500).json({ error: "Something went wrong on our side" });
-//   }
-// };

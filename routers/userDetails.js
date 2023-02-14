@@ -36,6 +36,8 @@ router.put("/updateUser/:userId", isAuth, userDetailsController.updateUser);
 
 router.get("/allUsers/:qrId", isAuth, userDetailsController.getAllUsers);
 
+router.get("/userDetailsByEmail/:email",userDetailsController.getUserByFCM);
+
 router.post(
   "/uploadImage",
   isAuth,
