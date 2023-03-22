@@ -1,6 +1,7 @@
 const Location = require("../models/location");
 const QRCode = require("../models/qrCode");
 const User = require("../models/user");
+const db = require(`../util/db`);
 
 exports.addLocation = async (req, res, next) => {
   const location = req.body.location;
@@ -50,13 +51,33 @@ exports.getAllLocations = async (req, res, next) => {
       // throw error.message;
       return res.status(404).json({ error: error.message });
     }
+    // const qrcode = await sequelize.query(`SELECT * FROM location_qr_code where qr_code_id=${qrId}`);
+    const qrcode = await db.query(`SELECT location_id FROM location_qr_code where qr_code_id=${qrId}`);
+
+    const abc = qrcode?.[0]?.map((val)=>{
+      var myData = []; 
+      if(!myData?.includes(val?.location_id)){
+        myData.push(val?.location_id)
+        console.log(",,,,,,,", val?.location_id)
+
+      }
+      return myData
+      
+      
+    })
+    console.log("-----", abc)
+    // // w  ww. j a va  2  s.  c  o  m
+    // myData.a(qrcode); // add at the end 
+    // console.log(myData); // prints [1] 
+    // console.log(myData[qrId]);
+
+    
     const getLocation = await Location.findAll(
-      { where: { qrCodeId: qrId } },
+      { where: { id: abc } },
       {
         include: { model: User, attributes: ["name", "age"] },
       }
     );
-    console.log(getLocation.length);
     if (getLocation.length === 0) {
       return res.status(404).json({ msg: "No Location in this bar" });
     }
