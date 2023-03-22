@@ -229,6 +229,7 @@ exports.newUser = async (req, res, next) => {
     relationPreference,
     fcmToken,
   } = req.body;
+  //return res.json(req.body);
 
   try {
     if (
@@ -403,10 +404,12 @@ exports.newUser = async (req, res, next) => {
     const token = jwt.sign({ id: newUser.id }, "pd_JWTSecret_123");
     console.log('jwt_token stored in db. token=====>',token)
     const updated = await db.query(`UPDATE users SET jwt_token='${token}' ,showbar='1' WHERE id=${newUser.id}`)
+
+    const roles = await db.query(`INSERT INTO role_user (user_id, role_id) VALUES (${newUser.id}, '2');`)
     res.status(200).json({
       msg: "User Data Stored",
       newUser,
-      token,
+      token
     });
   } catch (error) {
     error.statusCode = 403;
