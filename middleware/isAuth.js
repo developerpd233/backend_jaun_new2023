@@ -27,9 +27,9 @@ module.exports = async (req, res, next) => {
   }
   
    req.userId = decodedToken.id;
-   console.log("token ------>", decodedToken);
+  //  console.log("token ------>", decodedToken);
 
-  console.log("userId ---------------->", req.userId);
+  // console.log("userId ---------------->", req.userId);
   
    //const tokenExist = await db.query(`SELECT id FROM users WHERE jwt_token='${token}'`,{ type: QueryTypes.SELECT });
    //console.log('token checking in databse existing tokenExist====>',tokenExist)
@@ -37,8 +37,8 @@ module.exports = async (req, res, next) => {
    const user = await User.findOne({where:{jwt_token:token}});
 
 
-   console.log('!user===>',!user)
-   console.log('user===>',user)
+  //  console.log('!user===>',!user)
+  //  console.log('user===>',user)
    
    if(!user){ 
       const error = new Error("Not authenticated.");

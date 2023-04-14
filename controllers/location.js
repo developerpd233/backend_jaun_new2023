@@ -45,7 +45,7 @@ exports.getAllLocations = async (req, res, next) => {
   try {
     if (!qrId) {
       const error = new Error(
-        "No such QR or QRcode may be not scanned correctly "
+        "No such QR or QRcode may be not scanned correctly"
       );
       error.statusCode = 404;
       // throw error.message;
@@ -59,30 +59,29 @@ exports.getAllLocations = async (req, res, next) => {
       if(!myData?.includes(val?.location_id)){
         myData.push(val?.location_id)
         console.log(",,,,,,,", val?.location_id)
-
       }
       return myData
-      
       
     })
     console.log("-----", abc)
     // // w  ww. j a va  2  s.  c  o  m
     // myData.a(qrcode); // add at the end 
     // console.log(myData); // prints [1] 
-    // console.log(myData[qrId]);
 
-    
+
+
     const getLocation = await Location.findAll(
       { where: { id: abc } },
       {
         include: { model: User, attributes: ["name", "age"] },
       }
     );
+    
     if (getLocation.length === 0) {
       return res.status(404).json({ msg: "No Location in this bar" });
     }
 
-    res.json({ msg: "Locations Fetched", getLocation });
+    res.json({ msg: "Locations Fetcheds", getLocation });
   } catch (error) {
     error.statusCode = 403;
     // throw error.message;

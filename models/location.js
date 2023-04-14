@@ -14,6 +14,9 @@ const Location = sequelize.define(
       primaryKey: true,
       unique: true,
     },
+    room_image:{
+      type: DataTypes.STRING,
+    },
     location: {
       type: DataTypes.STRING,
     },

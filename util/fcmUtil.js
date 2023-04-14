@@ -12,7 +12,7 @@ exports.sendNotify = async (toUser,fromUser,title,body)=>{
   
 
   if(!_toUser && !_toUser?.fcmToken){ console.log(`user or fcmToken not exits. notfication will not send.`); return false; }    
-    console.log('userFcmToken====>',_toUser?.fcmToken)
+    // console.log('userFcmToken====>',_toUser?.fcmToken)
     var message = {
         to: _toUser.fcmToken, 
         //collapse_key: 'your_collapse_key',
